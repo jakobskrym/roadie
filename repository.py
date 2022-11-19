@@ -6,6 +6,28 @@ def generateRepositoryInsert(struct_name, table_name, initials, table_dict, tabl
 
     function_string = ""
 
+    function_string += f"""\n\n
+    // Insert{struct_name} inserts an entry into the {table_name} table
+
+    func Insert{struct_name}(ctx context.Context, tx *sqldb.Tx, {initials} models.{struct_name}) error {{
+
+        _, err := tx.Exec(ctx, `
+            INSERT INTO {table_name} (
+                
+            )
+            VALUES ()
+        `, )
+
+        if err != nil {{
+            slog.Error("Could not insert {struct_name}", "err", err)
+            return err
+        }}
+
+        return nil
+
+    }}
+    """
+
     return function_string
 
 def createRepositoryFile(table, package_name):
