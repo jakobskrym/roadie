@@ -18,6 +18,15 @@ I started this project because I found myself spending hours upon hours writing 
 - [ ] Add ways of retrieving all related information from other tables as well by using the `REFERENCES` keyword in SQL
 - [ ] Add `GET` functionality to retrieve entries with any `TIMESTAMP` column datatype for a specified to/from time interval
 
+### Testing
+
+- [ ] Add support for autogenerating tests with complete mock data
+
+### Future ideas
+
+- Allowing for different types of project structures, i.e. not always the `models` - `controllers` setup.
+- Autogenerating a frontend client to view and execute CRUD operations
+
 ## How does it work?
 
 ## Intended use cases
