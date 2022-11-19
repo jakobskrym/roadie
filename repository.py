@@ -40,78 +40,132 @@ def generateRepositoryRetrieval(struct_name, table_name, initials, table_dict, t
 
     func Get{struct_name}(ctx context.Context, tx *sqldb.Tx, {initials} models.{struct_name}) ([]models.{struct_name}, error) {{
 
-        {initials} := []models.{struct_name}{{}}
+        {initials}List := []models.{struct_name}{{}}
 
-        reflected_{initials} := reflect.ValueOf(&{initials}).Elem() 
+        column_names := []string{{{getColumnNames(table_dict)}}}
+
+        struct_to_column := make(map[string]string)
+        query_params := make(map[string]bool)
+        reflected_{initials} := reflect.ValueOf(&{initials}).Elem()
+        no_query_params := reflected_{initials}.NumField()
+
         for i := 0; i < reflected_{initials}.NumField(); i++ {{
+            param := reflected_{initials}.Type().Field(i).Name
             arg := reflected_{initials}.Field(i).Interface()
 
+            struct_to_column[param] = column_names[i]
+
+            // Defaulting to true
+            query_params[param] = true
+            
+            // Overriding if null
             switch reflected_{initials}.Type().Field(i).Type {{
                 case float64:
                     if arg == 0.0 {{
-
+                        query_params[param] = false
+                        no_query_params -= 1
                     }}
                 case float32:
                     if arg == 0.0 {{
-
+                        query_params[param] = false
+                        no_query_params -= 1
                     }}
                 case string:
                     if arg == "" {{
-
+                        query_params[param] = false
+                        no_query_params -= 1
                     }}
                 case uuid.UUID:
                     if arg == uuid.Nil() {{
-
+                        query_params[param] = false
+                        no_query_params -= 1
                     }}
                 case int:
                     if arg == 0 {{
-
+                        query_params[param] = false
+                        no_query_params -= 1
                     }}
-                case []int:
+                case []int{{}}:
                     if len(arg) == 0 {{
-
+                        query_params[param] = false
+                        no_query_params -= 1
                     }}
-                case []float64:
+                case []float64{{}}:
                     if len(arg) == 0 {{
-
+                        query_params[param] = false
+                        no_query_params -= 1
                     }}
-                case []float32:
+                case []float32{{}}:
                     if len(arg) == 0 {{
-
+                        query_params[param] = false
+                        no_query_params -= 1
                     }}
-                case []string:
+                case []string{{}}:
                     if len(arg) == 0 {{
-
+                        query_params[param] = false
+                        no_query_params -= 1
                     }}
-                case []uuid.UUID:
+                case []uuid.UUID{{}}:
                     if len(arg) == 0 {{
-
+                        query_params[param] = false
+                        no_query_params -= 1
                     }}
             }}
         }}
 
-        Create a for loop to construct the SQL query
-        1. Find which columns are passed in as nil (diff per dtype) and exclude them from matching query
-        2. Construct select query
+        // Constructing the retrieval query
+        var query strings.Builder
+        var values []any
 
-
-        _, err := tx.Exec(ctx, `
-            SELECT (
-                {getColumnsWith_Id(table_dict)}
-            )
-            FROM 
+        query.WriteString(`
+        SELECT (
+            {getColumnsWith_Id(table_dict)}
+        )
+        FROM
             {table_name}
-            WHERE
-            MATCHING FUNCTION
-            VALUES ({getDollarsID(table_dict)})
-        `, {getParamsID(table_dict, initials)})
+        WHERE 
+        `)
+
+        param_idx := 1
+        for param, notNil := range query_params {{
+            if notNil == true {{
+                query.WriteString(
+                    fmt.Sprintf("%d = '$%d'", struct_to_column[param], param_idx)
+                )
+                if param_idx < no_query_params {{
+                    query.WriteString(", ")
+                }} else {{
+                    query.WriteString("")
+                }}
+                param_idx += 1
+            }}
+        }}
+
+        // Executing query
+        rows, err := sqldb.Query(ctx, query.String(), values...)
+
+        defer rows.Close()
+        for rows.Next() {{
+            {initials}Row := models.{struct_name}{{}}
+
+            err := rows.Scan(
+                {getParamsSelectionMulti(table_dict, initials)}
+            )
+
+            if err != nil {{
+                slog.Error("Could not scan {struct_name}", "err", err)
+            }}
+
+            {initials}List = append({initials}List, {initials})
+        }}
+
 
         if err != nil {{
-            slog.Error("Could not insert {struct_name}", "err", err)
+            slog.Error("Could not retrieve {struct_name}", "err", err)
             return err
         }}
 
-        return nil
+        return {initials}List, nil
 
     }}
     """
@@ -136,6 +190,6 @@ def createRepositoryFile(table, package_name):
 
     # Adding the repository functions
     out_file += generateRepositoryInsert(struct_name, table_name, initials, table_dict, table)
-    #out_file += generateRepositoryRetrieval()
+    out_file += generateRepositoryRetrieval(struct_name, table_name, initials, table_dict, table)
 
     return out_file

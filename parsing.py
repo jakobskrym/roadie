@@ -158,6 +158,14 @@ def getParamsID(table, initials):
         paramsString += f"{initials}.{i.title().replace('_','')}, "
     return paramsString[:-2]
 
+def getParamsSelectionMulti(table_dict, initials):
+
+        paramsString = ""
+
+        for i in table_dict:
+            paramsString += f"&{initials}Row.{i.title().replace('_','')},\n "
+        return paramsString[:-2]
+
 def getReturnParams(table, initials):
     returnParamsString = ""
     for i in table:

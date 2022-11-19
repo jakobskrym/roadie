@@ -1,3 +1,4 @@
+import json
 
 def nullIDCheck(table, initials): 
 
@@ -9,3 +10,11 @@ def nullIDCheck(table, initials):
             slog.Info("replaced null id", "new id", {initials}.Id)
         }}
         """
+
+def getColumnNames(table_dict):
+
+    keys = json.dumps(list(table_dict.keys()))
+    str_keys = str(keys).replace("[","")
+    str_keys = str_keys.replace("]", "")
+
+    return str_keys
