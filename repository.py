@@ -13,10 +13,10 @@ def generateRepositoryInsert(struct_name, table_name, initials, table_dict, tabl
 
         _, err := tx.Exec(ctx, `
             INSERT INTO {table_name} (
-                
+                {getColumnsWith_Id(table_dict)}
             )
-            VALUES ()
-        `, )
+            VALUES ({getDollarsID(table_dict)})
+        `, {getParamsID(table_dict, initials)})
 
         if err != nil {{
             slog.Error("Could not insert {struct_name}", "err", err)

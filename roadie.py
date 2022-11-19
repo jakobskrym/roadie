@@ -155,6 +155,17 @@ def main():
             table_obj = table_objs_in_tableGroup[tableGroup][table]
 
             repository_file += createRepositoryFile(table_obj, MAIN_PACKAGE_NAME)
+
+         # Create a new directory because it does not exist
+        isExist = os.path.exists(f"{MAIN_PACKAGE_NAME}/repository/")
+        if not isExist:
+            os.makedirs(f"{MAIN_PACKAGE_NAME}/repository/")
+            print("The new directory is created!")
+
+
+        output_file = open(f"{MAIN_PACKAGE_NAME}/repository/{tableGroup}.go", "a")
+        output_file.write(repository_file)
+        output_file.close()
         
 
 if __name__ == '__main__':
