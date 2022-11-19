@@ -383,6 +383,10 @@ def generateControllerInsert(struct_name, table_name, initials, table_dict, acce
 
     return function_string
 
+def generateControllerRetrieval(struct_name, table_name, initials, table_dict, access, table):
+
+    return
+
 
 def createControllerFile(table, package_name, access):
 
