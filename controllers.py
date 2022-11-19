@@ -51,7 +51,46 @@ def generateControllerInsert(struct_name, table_name, initials, table_dict, acce
 
 def generateControllerRetrieval(struct_name, table_name, initials, table_dict, access, table):
 
-    return
+    # Adding struct def for request params
+    function_string = generateRequestParams(struct_name, table_dict, "Get", table) + "\n"
+    # Adding struct def for response params
+    function_string += generateResponseParams(struct_name, table_dict, "Get", table) + "\n"
+
+    function_string += f"""\n\n
+    // Get{struct_name} retrieves matched rows from the {table_name} table
+    // If no values are passed in, it will retrieve all rows. 
+
+    //encore:api {access} method=GET
+    func Get{struct_name}(ctx context.Context, {initials} *Get{struct_name}RequestParams) (*Get{struct_name}ResponseParams, error) {{
+
+        // Initializing transaction
+        tx, err := sqldb.Begin(ctx)
+        if err != nil {{
+            return nil, &errs.Error{{Code: errs.Internal, Message: "Could not initialize SQL transaction"}}
+        }} 
+        defer tx.Rollback()
+
+        // Executing insertion by calling repository layer
+        err = repository.Get{struct_name}(ctx, tx, {initials})
+        if err != nil {{
+            return nil, &errs.Error{{Code: errs.Internal, Message: "Could not retrieve {struct_name}"}}
+        }}
+
+
+        // Committing transaction
+        err = tx.Commit()
+         if err != nil {{
+            return nil, &errs.Error{{Code: errs.Internal, Message: "Could not commit SQL transaction"}}
+        }} 
+
+        response := {initials}
+
+        return &response, nil
+
+    }}\n\n
+    """
+
+    return function_string
 
 def generateControllerUpdate(struct_name, table_name, initials, table_dict, access, table):
 
@@ -80,6 +119,8 @@ def createControllerFile(table, package_name, access):
 
     # Adding the insertion endpoint
     out_file += generateControllerInsert(struct_name, table_name, initials, table_dict, access, table)
+    out_file += generateControllerRetrieval(struct_name, table_name, initials, table_dict, access, table)
+
 
     return out_file
     

@@ -11,7 +11,8 @@ I started this project because I found myself spending hours upon hours writing 
 
 - [ ] Add `GET` endpoint for each column in table, always returning an array of entries (make sure to highlight endpoints where SQL unique constraint means max 1 entry is returned)
 - [ ] Add `PUT` endpoint for updating a table entry, returning error if id is null, but allowing other values to be null and in that case not including them in SQL execution
-- [ ] ADD `DELETE` endpoint for removing a table entry with a specified id
+- [ ] Add `DELETE` endpoint for removing a table entry with a specified id
+- [ ] Add functionality for setting up the actual repository endpoint functions
 
 ### Advanced CRUD
 
@@ -36,6 +37,7 @@ I started this project because I found myself spending hours upon hours writing 
 ## :warning: Important
 
 Roadie is not intended to be used as a substitution for production-level development. Always make sure to test your code. 
+
 
 
 

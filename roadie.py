@@ -10,6 +10,7 @@ from utils import *
 from structs import *
 from models import *
 from controllers import *
+from repository import *
 
 def main():
     MIGRATIONS_PATH = input("Paste the path to your (clean) migrations file:\n")
@@ -143,6 +144,17 @@ def main():
         output_file = open(f"{MAIN_PACKAGE_NAME}/models/{tableGroup}.go", "a")
         output_file.write(models_file)
         output_file.close()
+
+    for tableGroup in tableGroups:
+
+        # Generating repository file
+        repository_file = f"package repository" + "\n\n"
+
+        for table in tables_in_tableGroup[tableGroup]:
+
+            table_obj = table_objs_in_tableGroup[tableGroup][table]
+
+            repository_file += createRepositoryFile(table_obj, MAIN_PACKAGE_NAME)
         
 
 if __name__ == '__main__':
