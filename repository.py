@@ -46,6 +46,7 @@ def generateRepositoryRetrieval(struct_name, table_name, initials, table_dict, t
 
         struct_to_column := make(map[string]string)
         query_params := make(map[string]bool)
+        var query_values []any
         reflected_{initials} := reflect.ValueOf(&{initials}).Elem()
         no_query_params := reflected_{initials}.NumField()
 
@@ -64,58 +65,77 @@ def generateRepositoryRetrieval(struct_name, table_name, initials, table_dict, t
                     if arg == 0.0 {{
                         query_params[param] = false
                         no_query_params -= 1
+                    }} else {{
+                        query_values = append(query_values, arg)
                     }}
                 case float32:
                     if arg == 0.0 {{
                         query_params[param] = false
                         no_query_params -= 1
+                    }} else {{
+                        query_values = append(query_values, arg)
                     }}
                 case string:
                     if arg == "" {{
                         query_params[param] = false
                         no_query_params -= 1
+                    }} else {{
+                        query_values = append(query_values, arg)
                     }}
                 case uuid.UUID:
                     if arg == uuid.Nil() {{
                         query_params[param] = false
                         no_query_params -= 1
+                    }} else {{
+                        query_values = append(query_values, arg)
                     }}
                 case int:
                     if arg == 0 {{
                         query_params[param] = false
                         no_query_params -= 1
+                    }} else {{
+                        query_values = append(query_values, arg)
                     }}
                 case []int{{}}:
                     if len(arg) == 0 {{
                         query_params[param] = false
                         no_query_params -= 1
+                    }} else {{
+                        query_values = append(query_values, arg)
                     }}
                 case []float64{{}}:
                     if len(arg) == 0 {{
                         query_params[param] = false
                         no_query_params -= 1
+                    }} else {{
+                        query_values = append(query_values, arg)
                     }}
                 case []float32{{}}:
                     if len(arg) == 0 {{
                         query_params[param] = false
                         no_query_params -= 1
+                    }} else {{
+                        query_values = append(query_values, arg)
                     }}
                 case []string{{}}:
                     if len(arg) == 0 {{
                         query_params[param] = false
                         no_query_params -= 1
+                    }} else {{
+                        query_values = append(query_values, arg)
                     }}
                 case []uuid.UUID{{}}:
                     if len(arg) == 0 {{
                         query_params[param] = false
                         no_query_params -= 1
+                    }} else {{
+                        query_values = append(query_values, arg)
                     }}
             }}
         }}
 
         // Constructing the retrieval query
         var query strings.Builder
-        var values []any
 
         query.WriteString(`
         SELECT (
@@ -142,7 +162,7 @@ def generateRepositoryRetrieval(struct_name, table_name, initials, table_dict, t
         }}
 
         // Executing query
-        rows, err := sqldb.Query(ctx, query.String(), values...)
+        rows, err := sqldb.Query(ctx, query.String(), query_values...)
 
         defer rows.Close()
         for rows.Next() {{
