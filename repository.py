@@ -142,9 +142,13 @@ def generateRepositoryRetrieval(struct_name, table_name, initials, table_dict, t
             {getColumnsWith_Id(table_dict)}
         )
         FROM
-            {table_name}
-        WHERE 
+            {table_name} 
         `)
+
+        // Returning all rows if no specified query params
+        if len(query_params) != 0 {{
+            query.WriteString("WHERE")
+        }}
 
         param_idx := 1
         for param, notNil := range query_params {{
